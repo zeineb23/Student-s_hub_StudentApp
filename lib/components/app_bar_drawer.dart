@@ -4,7 +4,6 @@ import 'package:flutter_application_7/pages/all_messages.dart';
 import 'package:flutter_application_7/pages/home_page.dart';
 import 'package:flutter_application_7/pages/login_page.dart';
 import 'package:flutter_application_7/pages/my_account_page.dart';
-import 'package:flutter_application_7/pages/my_messages_page.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final User? user;
@@ -80,18 +79,6 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => HomePage()),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.update), // Icon for Messages
-            title: Text('Mes Messages'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MyMessagesPage(),
-                ),
               );
             },
           ),
