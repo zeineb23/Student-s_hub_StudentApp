@@ -1,55 +1,25 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_7/components/app_bar_drawer.dart';
 import 'package:flutter_application_7/pages/login_page.dart';
 import 'package:flutter_application_7/pages/messages_page.dart';
+import 'package:flutter_application_7/services/categories.dart';
+import 'package:flutter_application_7/services/subscriptions.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   HomePage({Key? key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final User? user = FirebaseAuth.instance.currentUser;
 
-  final CollectionReference categoryCollection =
-      FirebaseFirestore.instance.collection('categorie');
+  final CategoriesCRUD _categoriesCRUD = CategoriesCRUD();
 
-  final CollectionReference subscriptionCollection =
-      FirebaseFirestore.instance.collection('subscription');
-
-  Stream<QuerySnapshot> fetchCategories() {
-    return categoryCollection.snapshots();
-  }
-
-  Stream<QuerySnapshot> fetchSubscriptions() {
-    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    return subscriptionCollection
-        .where('userId', isEqualTo: userId)
-        .snapshots();
-  }
-
-  Future<void> subscribe(String categoryId, String categoryName) async {
-    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    try {
-      await subscriptionCollection.add({
-        'userId': userId,
-        'categoryId': categoryId,
-        'categoryName': categoryName,
-        'timestamp': Timestamp.now(),
-      });
-      print("Subscribed successfully");
-    } catch (e) {
-      print("Error subscribing: $e");
-    }
-  }
-
-  Future<void> unsubscribe(String subscriptionId) async {
-    try {
-      await subscriptionCollection.doc(subscriptionId).delete();
-      print("Unsubscribed successfully");
-    } catch (e) {
-      print("Error unsubscribing: $e");
-    }
-  }
+  final SubscriptionsCRUD _subscriptionsCRUD = SubscriptionsCRUD();
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +47,7 @@ class HomePage extends StatelessWidget {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: fetchSubscriptions(),
+              stream: _subscriptionsCRUD.fetchSubscriptions(),
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot> subscriptionSnapshot) {
                 if (subscriptionSnapshot.hasError) {
@@ -142,7 +112,7 @@ class HomePage extends StatelessWidget {
                             },
                             onSelected: (value) {
                               if (value == 'unsubscribe') {
-                                unsubscribe(subscriptionId);
+                                _subscriptionsCRUD.unsubscribe(subscriptionId);
                               }
                             },
                           ),
@@ -162,7 +132,7 @@ class HomePage extends StatelessWidget {
                   return AlertDialog(
                     title: Text('Subscribe to Category'),
                     content: StreamBuilder<QuerySnapshot>(
-                      stream: fetchCategories(),
+                      stream: _categoriesCRUD.fetchCategories(),
                       builder: (BuildContext context,
                           AsyncSnapshot<QuerySnapshot> categorySnapshot) {
                         if (categorySnapshot.hasError) {
@@ -186,7 +156,8 @@ class HomePage extends StatelessWidget {
                               return ListTile(
                                 title: Text(categoryName),
                                 onTap: () {
-                                  subscribe(categoryId, categoryName);
+                                  _subscriptionsCRUD.subscribe(
+                                      categoryId, categoryName);
                                   Navigator.of(context).pop();
                                 },
                               );
