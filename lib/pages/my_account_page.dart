@@ -58,9 +58,14 @@ class _UserDetailsPageState extends State<MyAccountPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Username: $_username',
-              style: TextStyle(fontSize: 18.0),
+            Container(
+              height: 100,
+              child: Center(
+                child: Icon(
+                  Icons.account_circle,
+                  size: 65.0,
+                ),
+              ),
             ),
             SizedBox(height: 16.0),
             Text(
